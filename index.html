@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>網站檢查</title>
+    <link rel="stylesheet" href="_css/style.css" />
+    <script type="text/javascript" src="_js/jquery.min.js"></script>
+    <script type="text/javascript">
+	    $(function() {
+	    	$("#check_btn").click(function(){
+	    		var page = $("#page").val();
+	    		var fileMsg = "評估失敗";
+	    		var url_arry = (page.indexOf('\n') != -1)?page.split('\n'):[page];
+	    		var max_check_amt = url_arry.length;
+	    		var check = $("#check").val();
+	    		var current = 0;
+	    		var echo = "#message";
+	    		var processStage = "#stage";
+
+	    		$(echo).html("檢查中...<br>");
+
+	    		fnCheck(url_arry,max_check_amt,check,current,echo,processStage);
+
+	    		//console.log(url_arry);
+	    	})
+
+	    	//沒問題
+	    	$("#filter-ok").click(function(){
+	    		$("#message .result-item").hide();
+	    		$("#message .ok").show();
+	    	})
+
+	    	//有問題
+	    	$("#filter-not-ok").click(function(){
+	    		$("#message .result-item").hide();
+	    		$("#message .not-ok").show();
+	    	})
+
+	    	//顯示全部
+	    	$("#filter-all").click(function(){
+	    		$("#message .result-item").show();
+	    	})
+
+	    	//檢查googleAPI
+	    	$("#google-api").click(function(){
+	    		$("#check").val('apis.google.com,googleapis.com');
+	    	})
+
+	    	//轉換為連結
+	    	$("#convert_btn").click(function(){
+	    		var page = $("#page").val();
+	    		var fileMsg = "評估失敗";
+	    		var url_arry = (page.indexOf('\n') != -1)?page.split('\n'):[page];
+	    		var max_check_amt = url_arry.length;
+	    		var check = $("#check").val();
+	    		var current = 0;
+	    		var echo = "#message";
+	    		var processStage = "#stage";
+
+	    		$(echo).html("轉換中...<br>");
+
+	    		fnConvert(url_arry,max_check_amt,check,current,echo,processStage);
+
+	    		//console.log(url_arry);
+	    	})
+
+	    	//計算載入時間
+	    	$("#caculate_btn").click(function(){
+	    		var page = $("#page").val();
+	    		var fileMsg = "評估失敗";
+	    		var url_arry = (page.indexOf('\n') != -1)?page.split('\n'):[page];
+	    		var max_check_amt = url_arry.length;
+	    		var check = $("#check").val();
+	    		var current = 0;
+	    		var echo = "#message";
+	    		var processStage = "#stage";
+
+	    		$(echo).html("計算中...<br>");
+
+	    		fnCaculate(url_arry,max_check_amt,check,current,echo,processStage);
+
+	    		//console.log(url_arry);
+	    	})
+
+	    })
+
+	    //送交檢查程序
+	    function fnCheck(url_arry,max_check_amt,check,current,echo,processStage){
+	    	$.ajax({
+						type: 'POST',
+						url: '_process/check.php?action=check',
+						cache: false,
+						data: {
+								"page": encodeURIComponent(url_arry[current]),
+								"check": encodeURIComponent(check)
+							}
+					}).done(function( data ) {
+						$(echo).append(data);
+						current++;
+						if (current < max_check_amt) fnCheck(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+
+					}).fail(function( textStatus ) {
+						$(echo).append(failMsg+": "+textStatus);
+						current++;
+						if (current < max_check_amt) fnCheck(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+					});
+	    }
+
+	    //轉換為連結程序
+	    function fnConvert(url_arry,max_check_amt,check,current,echo,processStage){
+	    	$.ajax({
+						type: 'POST',
+						url: '_process/convert.php?action=convert',
+						cache: false,
+						data: {
+								"page": encodeURIComponent(url_arry[current]),
+								"check": encodeURIComponent(check)
+							}
+					}).done(function( data ) {
+						$(echo).append(data);
+						current++;
+						if (current < max_check_amt) fnConvert(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+
+					}).fail(function( textStatus ) {
+						$(echo).append(failMsg+": "+textStatus);
+						current++;
+						if (current < max_check_amt) fnConvert(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+					});
+	    }
+
+	    //計算載入時間
+	    function fnCaculate(url_arry,max_check_amt,check,current,echo,processStage){
+	    	$.ajax({
+						type: 'POST',
+						url: '_process/convert.php?action=loading_time',
+						cache: false,
+						data: {
+								"page": encodeURIComponent(url_arry[current]),
+								"check": encodeURIComponent(check)
+							}
+					}).done(function( data ) {
+						$(echo).append(data);
+						current++;
+						if (current < max_check_amt) fnCaculate(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+
+					}).fail(function( textStatus ) {
+						$(echo).append(failMsg+": "+textStatus);
+						current++;
+						if (current < max_check_amt) fnCaculate(url_arry,max_check_amt,check,current,echo,processStage);
+
+						var processStageCount = Math.round((current/max_check_amt)*100)+'%';
+						$(processStage).text(processStageCount);
+					});
+	    }
+
+    </script>
+</head>
+
+<body>
+    <div id="check_form">
+        <h1>網站檢查</h1>
+        <label for="index_page">網站:
+            <textarea id="page" name="page"></textarea>
+        </label>
+        <label for="index_page">檢查字串:
+            <input id="check" name="check" type="text" />
+            <button id="google-api">檢查googleAPI</button>
+        </label>
+        <button id="check_btn">檢查</button>
+        <button id="convert_btn">轉換連結</button>
+        <button id="caculate_btn">計算載入時間</button>
+    </div>
+    <div id="result">
+    	<h1>檢查結果</h1>
+    	<div id="process-wrap">檢查進度: <span id="stage">0%</span></div>
+    	<div id="filter-wrap">
+    		<button id="filter-all">全部</button>
+    		<button id="filter-ok">沒問題</button>
+    		<button id="filter-not-ok">有問題</button>
+    	</div>
+    	<div id="message">
+			此程式提供網站檢查出現不允許字串出現的內容<br>
+			請於上方"檢查字串"置入您預檢查的網站網址，然後在檢查字串中填入浴檢查的字串點選檢查即可<br>
+    	</div>
+    </div>
+
+</body>
+
+</html>
